@@ -19,7 +19,7 @@ type baseStage struct {
 
 type sourceStage struct {
 	baseStage
-	container iterator
+	container container
 }
 
 type actionStage struct {
@@ -64,7 +64,7 @@ func (s *actionStage) evaluate() interface{} {
 	return nil
 }
 
-func newSourceStage(container iterator) stage {
+func newSourceStage(container container) stage {
 	stage := &sourceStage{baseStage{
 		sourceStage:   nil,
 		previousStage: nil,

@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-type iterator interface {
+type container interface {
 	contents() []interface{}
 }
 
@@ -68,7 +68,7 @@ type sliceContainer struct {
 	basePtr uintptr
 }
 
-func newSliceContainer(items interface{}) iterator {
+func newSliceContainer(items interface{}) container {
 	s := sliceContainer{}
 
 	s.efacePtr = (*eface)(unsafe.Pointer(&items))
@@ -86,12 +86,10 @@ func newSliceContainer(items interface{}) iterator {
 	s.sliceSize = (*sliceDataPtr).len
 	s.basePtr = uintptr(sliceDataPtr.array)
 
-
 	s.slice = make([]interface{}, s.sliceSize)
 	for i := 0; i < s.sliceSize; i++ {
 		u2intptr := s.basePtr + s.typeEle.Size()*uintptr(i)
-		item := toInterface(s.typeEle, u2intptr)
-		s.slice[i] = item
+		s.slice[i] = toInterface(s.typeEle, u2intptr)
 	}
 	return &s
 }
