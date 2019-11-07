@@ -1,12 +1,9 @@
 package stage
 
-import (
-	"fmt"
-)
-
 type stage interface {
 	Reduce(rf ReducerFn) interface{}
 	Map(mf MapFn) stage
+	Limit(l int) stage
 }
 
 type baseStage struct {
@@ -45,15 +42,23 @@ func (s *baseStage) Map(mf MapFn) stage {
 	return stage
 }
 
-func (s *sourceStage) iterate() {
-	var items []interface{}
-	if s.container == nil {
-		fmt.Printf("use mock data!\n")
-		items = []interface{}{"1a", "2b", "3A", "4B", "5c", "6a"}
-	} else {
-		items = s.container.contents()
+func (s *baseStage) Limit(l int) stage {
+	stage := newStage(s.sourceStage, s)
+	accepted := 0
+	stage.acceptFn = func(i interface{}) {
+		if accepted < l {
+			accepted++
+			//stage.sink <- mf(i)
+			stage.nextStage.acceptFn(i)
+		}
+
 	}
-	for _, item := range items {
+	return stage
+}
+
+func (s *sourceStage) iterate() {
+	for iterator:=s.container.newIterator(); iterator.hasNext();  {
+		item:= iterator.next()
 		//s.sink <- item
 		s.nextStage.acceptFn(item)
 	}

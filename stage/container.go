@@ -7,7 +7,12 @@ import (
 )
 
 type container interface {
-	contents() []interface{}
+	newIterator() iterator
+}
+
+type iterator interface {
+	next() interface{}
+	hasNext() bool
 }
 
 type slice struct {
@@ -94,8 +99,26 @@ func newSliceContainer(items interface{}) container {
 	return &s
 }
 
-func (s *sliceContainer) contents()  []interface{} {
-	return s.slice
+type sliceContainerIterator struct {
+	container *sliceContainer
+	index int
+}
+
+func (s *sliceContainer) newIterator()  iterator {
+	return &sliceContainerIterator{
+		container:s,
+	}
+}
+
+func (iter *sliceContainerIterator) hasNext() bool {
+	return iter.index < iter.container.sliceSize
+}
+
+func (iter *sliceContainerIterator) next()  (r interface{}) {
+	u2intptr := iter.container.basePtr + iter.container.typeEle.Size()*uintptr(iter.index)
+	r = toInterface(iter.container.typeEle, u2intptr)
+	iter.index++
+	return
 }
 
 
