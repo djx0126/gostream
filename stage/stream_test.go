@@ -40,4 +40,25 @@ func TestSliceStream(t *testing.T) {
 	fmt.Printf("end with: %v\n", wordCount)
 }
 
+func TestSliceStreamFilter(t *testing.T) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
+	wordCount := StreamOf(words).Filter(func(i interface{}) bool {
+		return strings.Compare(i.(string), "B") != 0
+	}).Map(func(i interface{}) interface{} {
+		return strings.ToLower(i.(string))
+	}).Reduce(func(r interface{}, i interface{}) interface{} {
+		str := i.(string)
+		if r == nil { r = make(map[string]int)}
+
+		counter := r.(map[string]int)
+		if _, ok := (counter)[str]; ok {
+			(counter)[str]++
+		} else {
+			(counter)[str] = 1
+		}
+		return counter
+	}).(map[string]int)
+	fmt.Printf("end with: %v\n", wordCount)
+}
+
 

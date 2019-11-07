@@ -3,6 +3,7 @@ package stage
 type stage interface {
 	Reduce(rf ReducerFn) interface{}
 	Map(mf MapFn) stage
+	Filter(fn FilterFn) stage
 	Limit(l int) stage
 }
 
@@ -38,6 +39,17 @@ func (s *baseStage) Map(mf MapFn) stage {
 	stage.acceptFn = func(i interface{}) {
 		//stage.sink <- mf(i)
 		stage.nextStage.acceptFn(mf(i))
+	}
+	return stage
+}
+
+func (s *baseStage) Filter(filter FilterFn) stage {
+	stage := newStage(s.sourceStage, s)
+	stage.acceptFn = func(i interface{}) {
+		if filter(i) {
+			//stage.sink <- mf(i)
+			stage.nextStage.acceptFn(i)
+		}
 	}
 	return stage
 }

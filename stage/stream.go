@@ -9,6 +9,8 @@ type ReducerFn func(interface{}, interface{}) interface{}
 
 type MapFn func(interface{}) interface{}
 
+type FilterFn func(interface{}) bool
+
 func StreamOf(items interface{}) stage {
 	switch reflect.TypeOf(items).Kind() {
 	case reflect.Slice:
