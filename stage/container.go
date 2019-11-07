@@ -64,7 +64,6 @@ func toInterface(typeEle reflect.Type, ptr uintptr) interface{} {
 }
 
 type sliceContainer struct {
-	slice []interface{}
 	efacePtr *eface
 	eleSize uintptr
 	typeItf reflect.Type
@@ -91,11 +90,6 @@ func newSliceContainer(items interface{}) container {
 	s.sliceSize = (*sliceDataPtr).len
 	s.basePtr = uintptr(sliceDataPtr.array)
 
-	s.slice = make([]interface{}, s.sliceSize)
-	for i := 0; i < s.sliceSize; i++ {
-		u2intptr := s.basePtr + s.typeEle.Size()*uintptr(i)
-		s.slice[i] = toInterface(s.typeEle, u2intptr)
-	}
 	return &s
 }
 
