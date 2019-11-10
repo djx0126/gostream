@@ -5,6 +5,7 @@ type stage interface {
 	Map(mf MapFn) stage
 	Filter(fn FilterFn) stage
 	Limit(l int) stage
+	Collect(c collector)
 }
 
 type baseStage struct {
@@ -24,7 +25,7 @@ type actionStage struct {
 	baseStage
 }
 
-func (s *baseStage) Reduce(rf ReducerFn) (rt interface{}) {
+func (s *baseStage) Reduce(rf ReducerFn) interface{} {
 	stage := newActionStage(s.sourceStage, s)
 	var r interface{}
 	stage.acceptFn = func(i interface{}) {
@@ -32,6 +33,14 @@ func (s *baseStage) Reduce(rf ReducerFn) (rt interface{}) {
 	}
 	stage.evaluate()
 	return r
+}
+
+func (s *baseStage) Collect(c collector) {
+	stage := newActionStage(s.sourceStage, s)
+	stage.acceptFn = func(i interface{}) {
+		c.accept(i)
+	}
+	stage.evaluate()
 }
 
 func (s *baseStage) Map(mf MapFn) stage {
@@ -69,8 +78,8 @@ func (s *baseStage) Limit(l int) stage {
 }
 
 func (s *sourceStage) iterate() {
-	for iterator:=s.container.newIterator(); iterator.hasNext();  {
-		item:= iterator.next()
+	for iterator := s.container.newIterator(); iterator.hasNext(); {
+		item := iterator.next()
 		//s.sink <- item
 		s.nextStage.acceptFn(item)
 	}
@@ -123,4 +132,3 @@ func (s *baseStage) attachChan() {
 		}
 	}()
 }
-

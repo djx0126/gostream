@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestWordCount(t *testing.T)  {
+func TestWordCount(t *testing.T) {
 	words := []string{"a", "b", "A", "B", "c", "a"}
 	counter := make(map[string]int)
 
@@ -27,7 +27,9 @@ func TestSliceStream(t *testing.T) {
 		return strings.ToLower(i.(string))
 	}).Reduce(func(r interface{}, i interface{}) interface{} {
 		str := i.(string)
-		if r == nil { r = make(map[string]int)}
+		if r == nil {
+			r = make(map[string]int)
+		}
 
 		counter := r.(map[string]int)
 		if _, ok := (counter)[str]; ok {
@@ -48,7 +50,9 @@ func TestSliceStreamFilter(t *testing.T) {
 		return strings.ToLower(i.(string))
 	}).Reduce(func(r interface{}, i interface{}) interface{} {
 		str := i.(string)
-		if r == nil { r = make(map[string]int)}
+		if r == nil {
+			r = make(map[string]int)
+		}
 
 		counter := r.(map[string]int)
 		if _, ok := (counter)[str]; ok {
@@ -61,4 +65,18 @@ func TestSliceStreamFilter(t *testing.T) {
 	fmt.Printf("end with: %v\n", wordCount)
 }
 
+func TestNewSliceCollector(t *testing.T) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
 
+	var limitWords []string
+	StreamOf(words).Limit(3).Collect(NewSliceCollector(&limitWords))
+
+	fmt.Printf("limit words: %v\n", limitWords)
+
+	var noWords []string
+	StreamOf(words).Filter(func(i interface{}) bool {
+		return strings.Compare(i.(string), "no") == 0
+	}).Collect(NewSliceCollector(&noWords))
+
+	fmt.Printf("no words: %v\n", noWords)
+}
