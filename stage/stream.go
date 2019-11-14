@@ -21,7 +21,3 @@ func StreamOf(items interface{}) stage {
 
 	return newSourceStage(nil)
 }
-
-
-
-

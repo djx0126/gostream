@@ -54,7 +54,7 @@ type _type struct {
 }
 
 func toInterface(typeEle reflect.Type, ptr uintptr) interface{} {
-	typeDataPtr:=(*(*eface)(unsafe.Pointer(&typeEle))).data
+	typeDataPtr := (*(*eface)(unsafe.Pointer(&typeEle))).data
 	var i interface{}
 	e := (*eface)(unsafe.Pointer(&i))
 	e.data = unsafe.Pointer(ptr)
@@ -64,12 +64,12 @@ func toInterface(typeEle reflect.Type, ptr uintptr) interface{} {
 }
 
 type sliceContainer struct {
-	efacePtr *eface
-	eleSize uintptr
-	typeItf reflect.Type
-	typeEle reflect.Type
+	efacePtr  *eface
+	eleSize   uintptr
+	typeItf   reflect.Type
+	typeEle   reflect.Type
 	sliceSize int
-	basePtr uintptr
+	basePtr   uintptr
 }
 
 func newSliceContainer(items interface{}) container {
@@ -95,12 +95,12 @@ func newSliceContainer(items interface{}) container {
 
 type sliceContainerIterator struct {
 	container *sliceContainer
-	index int
+	index     int
 }
 
-func (s *sliceContainer) newIterator()  iterator {
+func (s *sliceContainer) newIterator() iterator {
 	return &sliceContainerIterator{
-		container:s,
+		container: s,
 	}
 }
 
@@ -108,12 +108,9 @@ func (iter *sliceContainerIterator) hasNext() bool {
 	return iter.index < iter.container.sliceSize
 }
 
-func (iter *sliceContainerIterator) next()  (r interface{}) {
+func (iter *sliceContainerIterator) next() (r interface{}) {
 	u2intptr := iter.container.basePtr + iter.container.typeEle.Size()*uintptr(iter.index)
 	r = toInterface(iter.container.typeEle, u2intptr)
 	iter.index++
 	return
 }
-
-
-

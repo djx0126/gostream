@@ -10,14 +10,15 @@ type collector interface {
 }
 
 type sliceCollector struct {
-	slicePtr interface{}
+	slicePtr   interface{}
 	sliceValue reflect.Value
-	_sliceP *slice
+	_sliceP    *slice
 }
 
 func (c *sliceCollector) accept(x interface{}) {
 	c.sliceValue = reflect.Append(c.sliceValue, reflect.ValueOf(x))
 
+	(*c._sliceP).array = unsafe.Pointer(c.sliceValue.Pointer())
 	(*c._sliceP).len = c.sliceValue.Len()
 	(*c._sliceP).cap = c.sliceValue.Cap()
 }
@@ -29,9 +30,11 @@ func NewSliceCollector(slicePtr interface{}) collector {
 
 	v := reflect.ValueOf(slicePtr).Elem()
 	(*slice).array = unsafe.Pointer(v.Pointer())
+	(*slice).len = 0
+	(*slice).cap = 0
 	return &sliceCollector{
-		slicePtr: slicePtr,
-		sliceValue:v,
-		_sliceP:slice,
+		slicePtr:   slicePtr,
+		sliceValue: v,
+		_sliceP:    slice,
 	}
 }
