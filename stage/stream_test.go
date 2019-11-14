@@ -42,6 +42,35 @@ func TestSliceStream(t *testing.T) {
 	fmt.Printf("end with: %v\n", wordCount)
 }
 
+func TestMapS(t *testing.T) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
+	var limitWords []string
+
+	StreamOf(words).MapS(strings.ToLower).Collect(NewSliceCollector(&limitWords))
+
+	fmt.Printf("end with: %v\n", limitWords)
+}
+
+func BenchmarkSliceMap(b *testing.B) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
+	var limitWords []string
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		StreamOf(words).Map(func(i interface{}) interface{} {
+			return strings.ToLower(i.(string))
+		}).Collect(NewSliceCollector(&limitWords))
+	}
+}
+
+func BenchmarkSliceMapS(b *testing.B) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
+	var limitWords []string
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		StreamOf(words).MapS(strings.ToLower).Collect(NewSliceCollector(&limitWords))
+	}
+}
+
 func TestSliceStreamFilter(t *testing.T) {
 	words := []string{"a", "b", "A", "B", "c", "a"}
 	wordCount := StreamOf(words).Filter(func(i interface{}) bool {
@@ -65,7 +94,7 @@ func TestSliceStreamFilter(t *testing.T) {
 	fmt.Printf("end with: %v\n", wordCount)
 }
 
-func TestNewSliceCollector(t *testing.T) {
+func TestLimitSliceCollector(t *testing.T) {
 	words := []string{"a", "b", "A", "B", "c", "a"}
 
 	var limitWords []string
@@ -77,6 +106,21 @@ func TestNewSliceCollector(t *testing.T) {
 	StreamOf(words).Filter(func(i interface{}) bool {
 		return strings.Compare(i.(string), "no") == 0
 	}).Collect(NewSliceCollector(&noWords))
+
+	fmt.Printf("no words: %v\n", noWords)
+}
+
+func TestNewSliceCollectorSimple(t *testing.T) {
+	words := []string{"a", "b", "A", "B", "c", "a"}
+
+	var limitWords []string
+	StreamOf(words).Collect(NewSliceCollector(&limitWords))
+
+	fmt.Printf("limit words: %v\n", limitWords)
+
+	var noWords []string
+	words = []string{}
+	StreamOf(words).Collect(NewSliceCollector(&noWords))
 
 	fmt.Printf("no words: %v\n", noWords)
 }

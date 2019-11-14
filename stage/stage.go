@@ -1,8 +1,11 @@
 package stage
 
+import "reflect"
+
 type stage interface {
 	Reduce(rf ReducerFn) interface{}
 	Map(mf MapFn) stage
+	MapS(mf interface{}) stage
 	Filter(fn FilterFn) stage
 	Limit(l int) stage
 	Collect(c collector)
@@ -48,6 +51,19 @@ func (s *baseStage) Map(mf MapFn) stage {
 	stage.acceptFn = func(i interface{}) {
 		//stage.sink <- mf(i)
 		stage.nextStage.acceptFn(mf(i))
+	}
+	return stage
+}
+
+func (s *baseStage) MapS(fn interface{}) stage {
+	fv := reflect.ValueOf(fn)
+	input := make([]reflect.Value, 1)
+
+	stage := newStage(s.sourceStage, s)
+	stage.acceptFn = func(i interface{}) {
+		//stage.sink <- mf(i)
+		input[0] = reflect.ValueOf(i)
+		stage.nextStage.acceptFn(fv.Call(input)[0].Interface())
 	}
 	return stage
 }
